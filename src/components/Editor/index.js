@@ -4,6 +4,15 @@ import "./index.css";
 class Editor extends Component {
   constructor(props) {
     super(props);
+    let grids = [];
+    for (let i = 0; i < 100; i++) {
+      let row = [];
+      for (let j = 0; j < 100; j++) {
+        row.push("normal");
+      }
+      grids = [...grids, row];
+    }
+
     this.state = {
       brush: "normal",
       isDrawing: false,
@@ -13,10 +22,13 @@ class Editor extends Component {
         normal: "white",
         muddy: "brown",
         water: "blue"
-      }
+      },
+      grids
     };
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleRefresh = this.handleRefresh.bind(this);
+    this.handleReset = this.handleReset.bind(this);
   }
 
   componentDidMount() {
@@ -34,6 +46,12 @@ class Editor extends Component {
         const message =
           "Corresponding Grid Coordinate: " + mousePos.x + ", " + mousePos.y;
         if (this.state.isDrawing && mousePos.x <= 99 && mousePos.y <= 99) {
+          ctx.clearRect(mousePos.x * 10, mousePos.y * 10, 10, 10);
+          let newGrids = JSON.parse(JSON.stringify(this.state.grids));
+          newGrids[mousePos.x][mousePos.y] = this.state.brush;
+          this.setState({
+            grids: newGrids
+          });
           if (this.state.brush === "package") {
             this.drawPackage(this.state.ctx, mousePos);
           } else if (this.state.brush === "target") {
@@ -46,6 +64,7 @@ class Editor extends Component {
               this.state.brushColor[this.state.brush]
             );
           }
+          this.handleRefresh();
         }
         this.writeMessage(canvas, message);
       },
@@ -172,6 +191,12 @@ class Editor extends Component {
     });
     const mousePos = this.getMousePos(this.state.canvas, event);
     if (mousePos.x > 99 || mousePos.y > 99) return;
+    this.state.ctx.clearRect(mousePos.x * 10, mousePos.y * 10, 10, 10);
+    let newGrids = JSON.parse(JSON.stringify(this.state.grids));
+    newGrids[mousePos.x][mousePos.y] = this.state.brush;
+    this.setState({
+      grids: newGrids
+    });
     if (this.state.brush === "package") {
       this.drawPackage(this.state.ctx, mousePos);
     } else if (this.state.brush === "target") {
@@ -184,6 +209,7 @@ class Editor extends Component {
         this.state.brushColor[this.state.brush]
       );
     }
+    this.handleRefresh();
   }
 
   handleMouseUp() {
@@ -191,6 +217,55 @@ class Editor extends Component {
       this.setState({
         isDrawing: false
       });
+    }
+    this.handleRefresh();
+  }
+
+  handleReset() {
+    let grids = [];
+    for (let i = 0; i < 100; i++) {
+      let row = [];
+      for (let j = 0; j < 100; j++) {
+        row.push("normal");
+      }
+      grids = [...grids, row];
+    }
+    this.setState({
+      grids
+    });
+    this.state.ctx.clearRect(
+      0,
+      0,
+      this.state.canvas.width,
+      this.state.canvas.height
+    );
+    this.updateCanvas(this.state.ctx);
+  }
+
+  handleRefresh() {
+    this.state.ctx.clearRect(
+      0,
+      0,
+      this.state.canvas.width,
+      this.state.canvas.height
+    );
+    this.updateCanvas(this.state.ctx);
+    for (let i = 0; i < 100; i++) {
+      for (let j = 0; j < 100; j++) {
+        if (this.state.grids[i][j] !== "normal") {
+          if (this.state.grids[i][j] === "package") {
+            this.drawPackage(this.state.ctx, { x: i, y: j });
+          } else if (this.state.grids[i][j] === "target") {
+            this.drawTarget(this.state.ctx, { x: i, y: j });
+          } else {
+            this.drawRect(
+              this.state.ctx,
+              { x: i, y: j },
+              this.state.brushColor[this.state.grids[i][j]]
+            );
+          }
+        }
+      }
     }
   }
 
@@ -223,6 +298,22 @@ class Editor extends Component {
             </Radio.Group>
           </div>
           <div className="buttons__container">
+            <Button
+              id="btn-reset"
+              type="primary"
+              ghost
+              onClick={this.handleReset}
+            >
+              Reset
+            </Button>
+            <Button
+              id="btn-refresh"
+              type="primary"
+              ghost
+              onClick={this.handleRefresh}
+            >
+              Refresh
+            </Button>
             <Button id="btn-download" type="primary">
               Download Map File
             </Button>

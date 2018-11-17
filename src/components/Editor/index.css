@@ -25,6 +25,10 @@
   width: 900px;
   margin: auto;
 }
+
+#btn-refresh {
+  margin: 5px;
+}
 #canvas {
   margin: auto;
 }
