@@ -1,0 +1,30 @@
+.Editor__container .headline {
+  text-align: center;
+}
+
+.Brush__container {
+  padding-top: 100px;
+  padding-left: 200px;
+}
+.Brush__container h2 {
+  float: left;
+  margin-right: 20px;
+}
+.Brush__container .ant-radio-group {
+  float: left;
+}
+.buttons__container {
+  padding-top: 100px;
+}
+
+.buttons__container .ant-btn {
+  text-align: center;
+}
+
+.my-layout {
+  width: 900px;
+  margin: auto;
+}
+#canvas {
+  margin: auto;
+}
