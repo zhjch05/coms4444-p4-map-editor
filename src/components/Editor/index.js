@@ -14,7 +14,7 @@ class Editor extends Component {
     }
 
     this.state = {
-      brush: "normal",
+      brush: "muddy",
       isDrawing: false,
       canvas: null,
       ctx: null,
