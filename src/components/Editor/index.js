@@ -23,12 +23,20 @@ class Editor extends Component {
         muddy: "brown",
         water: "blue"
       },
-      grids
+      grids,
+      outputDict: {
+        normal: "n",
+        muddy: "m",
+        water: "w",
+        package: "p",
+        target: "t"
+      }
     };
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleRefresh = this.handleRefresh.bind(this);
     this.handleReset = this.handleReset.bind(this);
+    this.handleDownload = this.handleDownload.bind(this);
   }
 
   componentDidMount() {
@@ -52,18 +60,18 @@ class Editor extends Component {
           this.setState({
             grids: newGrids
           });
-          if (this.state.brush === "package") {
-            this.drawPackage(this.state.ctx, mousePos);
-          } else if (this.state.brush === "target") {
-            this.drawTarget(this.state.ctx, mousePos);
-          } else {
-            this.drawContour(this.state.ctx, mousePos);
-            this.drawRect(
-              this.state.ctx,
-              mousePos,
-              this.state.brushColor[this.state.brush]
-            );
-          }
+          // if (this.state.brush === "package") {
+          //   this.drawPackage(this.state.ctx, mousePos);
+          // } else if (this.state.brush === "target") {
+          //   this.drawTarget(this.state.ctx, mousePos);
+          // } else {
+          //   this.drawContour(this.state.ctx, mousePos);
+          //   this.drawRect(
+          //     this.state.ctx,
+          //     mousePos,
+          //     this.state.brushColor[this.state.brush]
+          //   );
+          // }
           this.handleRefresh();
         }
         this.writeMessage(canvas, message);
@@ -197,18 +205,18 @@ class Editor extends Component {
     this.setState({
       grids: newGrids
     });
-    if (this.state.brush === "package") {
-      this.drawPackage(this.state.ctx, mousePos);
-    } else if (this.state.brush === "target") {
-      this.drawTarget(this.state.ctx, mousePos);
-    } else {
-      this.drawContour(this.state.ctx, mousePos);
-      this.drawRect(
-        this.state.ctx,
-        mousePos,
-        this.state.brushColor[this.state.brush]
-      );
-    }
+    // if (this.state.brush === "package") {
+    //   this.drawPackage(this.state.ctx, mousePos);
+    // } else if (this.state.brush === "target") {
+    //   this.drawTarget(this.state.ctx, mousePos);
+    // } else {
+    //   this.drawContour(this.state.ctx, mousePos);
+    //   this.drawRect(
+    //     this.state.ctx,
+    //     mousePos,
+    //     this.state.brushColor[this.state.brush]
+    //   );
+    // }
     this.handleRefresh();
   }
 
@@ -269,6 +277,24 @@ class Editor extends Component {
     }
   }
 
+  handleDownload() {
+    let output = "";
+    for (let i = 0; i < 100; i++) {
+      for (let j = 0; j < 100; j++) {
+        output = output + this.state.outputDict[this.state.grids[i][j]];
+      }
+      output += "\n";
+    }
+    let element = document.createElement("a");
+
+    let file = new Blob([output], {
+      type: "text/plain"
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = "map.txt";
+    element.click();
+  }
+
   render() {
     return (
       <div className="Editor__container">
@@ -314,7 +340,11 @@ class Editor extends Component {
             >
               Refresh
             </Button>
-            <Button id="btn-download" type="primary">
+            <Button
+              id="btn-download"
+              type="primary"
+              onClick={this.handleDownload}
+            >
               Download Map File
             </Button>
           </div>
