@@ -1,16 +1,29 @@
 import React, { Component } from "react";
+import { instanceOf } from "prop-types";
+import { withCookies, Cookies } from "react-cookie";
 import { Button, Radio } from "antd";
 import "./index.css";
 class Editor extends Component {
+  static propTypes = {
+    cookies: instanceOf(Cookies).isRequired
+  };
   constructor(props) {
     super(props);
+
+    const { cookies } = props;
     let grids = [];
-    for (let i = 0; i < 100; i++) {
-      let row = [];
-      for (let j = 0; j < 100; j++) {
-        row.push("normal");
+    let restoredGrids = cookies.get("grids");
+    if (restoredGrids) {
+      grids = restoredGrids;
+      console.log("Restored from local");
+    } else {
+      for (let i = 0; i < 100; i++) {
+        let row = [];
+        for (let j = 0; j < 100; j++) {
+          row.push("normal");
+        }
+        grids = [...grids, row];
       }
-      grids = [...grids, row];
     }
 
     this.state = {
@@ -275,6 +288,10 @@ class Editor extends Component {
         }
       }
     }
+
+    console.log("write into cookies");
+    const { cookies } = this.props;
+    cookies.set("grids", this.state.grids, { path: "/" });
   }
 
   handleDownload() {
@@ -290,9 +307,15 @@ class Editor extends Component {
     let file = new Blob([output], {
       type: "text/plain"
     });
-    element.href = URL.createObjectURL(file);
+    const url = URL.createObjectURL(file);
+    element.href = url;
     element.download = "map.txt";
+    document.body.appendChild(element);
     element.click();
+    setTimeout(function() {
+      document.body.removeChild(element);
+      window.URL.revokeObjectURL(url);
+    }, 100);
   }
 
   render() {
@@ -354,4 +377,4 @@ class Editor extends Component {
   }
 }
 
-export default Editor;
+export default withCookies(Editor);
